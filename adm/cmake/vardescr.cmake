@@ -214,6 +214,9 @@ VTK by means of its dedicated VIS component (VTK Integration Services).")
 set (USE_ADOLC_DESCR
 "Indicates whether ADOL-C 3-rd party is used or not.")
 
+set(USE_CODIPACK_DESCR
+        "Indicates whether CoDiPack 3-rd party is used or not.")
+
 set (USE_XLIB_DESCR "Indicates whether X11 is used or not")
 
 set (USE_D3D_DESCR "Indicates whether optional Direct3D wrapper in OCCT visualization module should be build or not")
