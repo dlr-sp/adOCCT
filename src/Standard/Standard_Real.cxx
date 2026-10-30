@@ -37,10 +37,10 @@ Standard_Real ACos(const Standard_Real& Value)
   {
     return M_PI; // acos(-1.)
   }
-#ifdef ADOLC_REVERSE_MODE
-  return acos(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::acos(Value);
+#else
+  return acos(Value);
 #endif
 }
 
@@ -68,17 +68,7 @@ double ACos(const double Value)
 
 inline Standard_Real apx_for_ACosApprox(const Standard_Real& x)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return (-0.000007239283986332
-          + x
-              * (2.000291665285952400
-                 + x
-                     * (0.163910606547823220
-                        + x
-                            * (0.047654245891495528
-                               - x * (0.005516443930088506 + 0.015098965761299077 * x)))))
-         / sqrt(2 * x);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return (-0.000007239283986332
           + x
               * (2.000291665285952400
@@ -88,6 +78,16 @@ inline Standard_Real apx_for_ACosApprox(const Standard_Real& x)
                             * (0.047654245891495528
                                - x * (0.005516443930088506 + 0.015098965761299077 * x)))))
          / adtl::sqrt(2 * x);
+#else
+  return (-0.000007239283986332
+          + x
+              * (2.000291665285952400
+                 + x
+                     * (0.163910606547823220
+                        + x
+                            * (0.047654245891495528
+                               - x * (0.005516443930088506 + 0.015098965761299077 * x)))))
+         / sqrt(2 * x);
 #endif
 }
 
@@ -171,10 +171,10 @@ Standard_Real ASin(const Standard_Real& Value)
   {
     return -M_PI_2; // asin(-1.)
   }
-#ifdef ADOLC_REVERSE_MODE
-  return asin(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::asin(Value);
+#else
+  return asin(Value);
 #endif
 }
 
@@ -204,10 +204,10 @@ Standard_Real ATan2(const Standard_Real& Value, const Standard_Real& Other)
   {
     throw Standard_NullValue();
   }
-#ifdef ADOLC_REVERSE_MODE
-  return atan2(Value, Other);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::atan2(Value, Other);
+#else
+  return atan2(Value, Other);
 #endif
 }
 
@@ -449,10 +449,10 @@ Standard_Real ATanh(const Standard_Real& Value)
 #if defined(__QNX__)
   return std::atanh(Value);
 #else
-  #ifdef ADOLC_REVERSE_MODE
-  return atanh(Value);
-  #else
+  #if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::atanh(Value);
+  #else
+  return atanh(Value);
   #endif
 #endif
 }
@@ -488,10 +488,10 @@ Standard_Real ACosh(const Standard_Real& Value)
 #if defined(__QNX__)
   return std::acosh(Value);
 #else
-  #ifdef ADOLC_REVERSE_MODE
-  return acosh(Value);
-  #else
+  #if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::acosh(Value);
+  #else
+  return acosh(Value);
   #endif
 #endif
 }
@@ -524,10 +524,10 @@ Standard_Real Cosh(const Standard_Real& Value)
 #endif
     throw Standard_NumericError("Result of Cosh exceeds the maximum value Standard_Real");
   }
-#ifdef ADOLC_REVERSE_MODE
-  return cosh(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::cosh(Value);
+#else
+  return cosh(Value);
 #endif
 }
 
@@ -555,10 +555,10 @@ Standard_Real Sinh(const Standard_Real& Value)
 #endif
     throw Standard_NumericError("Result of Sinh exceeds the maximum value Standard_Real");
   }
-#ifdef ADOLC_REVERSE_MODE
-  return sinh(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::sinh(Value);
+#else
+  return sinh(Value);
 #endif
 }
 
@@ -586,10 +586,10 @@ Standard_Real Log(const Standard_Real& Value)
 #endif
     throw Standard_NumericError("Illegal argument in Log");
   }
-#ifdef ADOLC_REVERSE_MODE
-  return log(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::log(Value);
+#else
+  return log(Value);
 #endif
 }
 
@@ -617,10 +617,10 @@ Standard_Real Sqrt(const Standard_Real& Value)
 #endif
     throw Standard_NumericError("Illegal argument in Sqrt");
   }
-#ifdef ADOLC_REVERSE_MODE
-  return sqrt(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::sqrt(Value);
+#else
+  return sqrt(Value);
 #endif
 }
 
