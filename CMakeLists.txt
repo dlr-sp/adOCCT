@@ -356,6 +356,7 @@ set (USE_DRACO     OFF CACHE BOOL "${USE_DRACO_DESCR}")
 set (USE_TBB       OFF CACHE BOOL "${USE_TBB_DESCR}")
 set (USE_EIGEN     OFF CACHE BOOL "${USE_EIGEN_DESCR}")
 set (USE_ADOLC     OFF CACHE BOOL "${USE_ADOLC_DESCR}")
+set(USE_CODIPACK OFF CACHE BOOL "${USE_CODIPACK_DESCR}")
 
 if (WIN32 OR ANDROID OR IOS OR EMSCRIPTEN)
   # no Xlib
@@ -482,6 +483,7 @@ OCCT_IS_PRODUCT_REQUIRED (CSF_OpenGlesLibs CAN_USE_GLES2)
 OCCT_IS_PRODUCT_REQUIRED (CSF_TBB CAN_USE_TBB)
 OCCT_IS_PRODUCT_REQUIRED (CSF_EIGEN CAN_USE_EIGEN)
 OCCT_IS_PRODUCT_REQUIRED (CSF_ADOLC CAN_USE_ADOLC)
+OCCT_IS_PRODUCT_REQUIRED(CSF_CoDiPack CAN_USE_CODIPACK)
 
 set (OCCT_3RDPARTY_CMAKE_LIST)
 
@@ -716,29 +718,57 @@ else()
   OCCT_CHECK_AND_UNSET ("INSTALL_EIGEN")
 endif()
 
-# ADOL-C
-if (CAN_USE_ADOLC)
+# ADOL-C or CoDiPack
+if (CAN_USE_ADOLC OR CAN_USE_CODIPACK)
+  # throw an error if both USE_ADOLC and USE_CODIPACK are activated
+  if (USE_ADOLC AND USE_CODIPACK)
+    message(FATAL_ERROR "Cannot use ADOL-C and CoDiPack at the same time, pick one.")
+  endif ()
+
+  # ADOL-C
   if (USE_ADOLC)
     add_definitions (-DHAVE_ADOLC)
     OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/adolc")
     # Add option for activating reverse mode of ADOL-C (trace-based option)
+    # otherwise, traceless forward mode is used
     if (NOT DEFINED ADOLC_REVERSE_MODE)
       set(ADOLC_REVERSE_MODE OFF CACHE BOOL "Enable reverse mode of ADOL-C")
     endif ()
     if (ADOLC_REVERSE_MODE)
       add_definitions(-DADOLC_REVERSE_MODE)
     endif ()
-    # Add option for AD testing
+  else ()
+    OCCT_CHECK_AND_UNSET_GROUP("3RDPARTY_ADOLC")
+    #OCCT_CHECK_AND_UNSET("BUILD_AD_TESTS")
+  endif ()
+
+  # CoDiPack
+  if (USE_CODIPACK)
+    add_definitions(-DHAVE_CODIPACK)
+    OCCT_INCLUDE_CMAKE_FILE("adm/cmake/codipack")
+    # Add option for activating reverse mode of CoDiPack (e.g. codi::RealReverse)
+    # otherwise, forward mode is used
+    if (NOT DEFINED CODIPACK_REVERSE_MODE)
+      set(CODIPACK_REVERSE_MODE OFF CACHE BOOL "Enable reverse mode of CoDiPack")
+    endif ()
+    if (CODIPACK_REVERSE_MODE)
+      add_definitions(-DCODIPACK_REVERSE_MODE)
+    endif ()
+  else ()
+    OCCT_CHECK_AND_UNSET_GROUP("3RDPARTY_CODIPACK")
+  endif ()
+
+  # Add option for AD testing
+  if (USE_ADOLC OR USE_CODIPACK)
     if (NOT DEFINED BUILD_AD_TESTS)
       set(BUILD_AD_TESTS OFF CACHE BOOL "Enable AD tests")
     endif ()
-  else()
-    OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_ADOLC")
-    OCCT_CHECK_AND_UNSET("BUILD_AD_TESTS")
-  endif()
+  endif ()
 else()
   OCCT_CHECK_AND_UNSET ("USE_ADOLC")
   OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_ADOLC")
+  OCCT_CHECK_AND_UNSET("USE_CODIPACK")
+  OCCT_CHECK_AND_UNSET_GROUP("3RDPARTY_CODIPACK")
   OCCT_CHECK_AND_UNSET("BUILD_AD_TESTS")
 endif ()
 
