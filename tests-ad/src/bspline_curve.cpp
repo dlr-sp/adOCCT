@@ -58,12 +58,13 @@ class TestGeomBSplineCurveByParameterId : public ::testing::TestWithParam<int>
 {
 };
 
-#ifdef ADOLC_REVERSE_MODE
+#ifdef HAVE_ADOLC
+  #ifdef ADOLC_REVERSE_MODE
 
-  #include <adolc/adouble.h>
-  #include <adolc/drivers/drivers.h>
-  #include <adolc/taping.h>
-  #include <adolc/adalloc.h>
+#include <adolc/adouble.h>
+    #include <adolc/drivers/drivers.h>
+    #include <adolc/taping.h>
+    #include <adolc/adalloc.h>
 
 TEST_P(TestGeomBSplineCurveByParameterId, ReverseSensitivityWrtPoleCoordinateXYZ)
 {
@@ -189,6 +190,77 @@ TEST_P(TestGeomBSplineCurveByParameterId, SensitivityWrtPoleCoordinateXYZ)
   EXPECT_NEAR(pnt_primal.Y().getADValue(0), fd_sensitivity_y, 1e-5);
   EXPECT_NEAR(pnt_primal.Z().getADValue(0), fd_sensitivity_z, 1e-5);
 }
+#endif
+#endif
+
+#ifdef HAVE_CODIPACK
+  #ifdef CODIPACK_REVERSE_MODE
+  // TODO
+  #else
+TEST_P(TestGeomBSplineCurveByParameterId, SensitivityWrtPoleCoordinateXYZ)
+{
+  // independent variable index (x, y or z)
+  int independent_idx = GetParam();
+
+  ASSERT_TRUE(independent_idx >= 0 && independent_idx <= 2);
+
+  std::vector<Standard_Real> design_parameters = {0.0, 1.0, 2.0};
+
+  // set AD seed
+  design_parameters[independent_idx].setGradient(1.0);
+
+  Handle(Geom_BSplineCurve) ad_curve = bspline_curve(design_parameters);
+
+  gp_Pnt pnt_primal;
+
+  ad_curve->D0(Standard_Real(0.5), pnt_primal);
+
+  // extract gradient
+  const double gradient_x = pnt_primal.X().getGradient();
+  const double gradient_y = pnt_primal.Y().getGradient();
+  const double gradient_z = pnt_primal.Z().getGradient();
+
+  // re-set the seed
+  design_parameters[independent_idx].setGradient(0.0);
+
+  // finite differences
+  double fd_step = 1e-6;
+
+  double design_parameter_original_value = design_parameters[independent_idx].getValue();
+
+  design_parameters[independent_idx] += fd_step;
+
+  Handle(Geom_BSplineCurve) perturbed_curve = bspline_curve(design_parameters);
+
+  gp_Pnt pnt_perturbed;
+
+  perturbed_curve->D0(Standard_Real(0.5), pnt_perturbed);
+
+  double fd_sensitivity_x = (pnt_perturbed.X().getValue() - pnt_primal.X().getValue()) / fd_step;
+  double fd_sensitivity_y = (pnt_perturbed.Y().getValue() - pnt_primal.Y().getValue()) / fd_step;
+  double fd_sensitivity_z = (pnt_perturbed.Z().getValue() - pnt_primal.Z().getValue()) / fd_step;
+
+  design_parameters[independent_idx] = design_parameter_original_value;
+
+  /*
+  std::cout << "Comparison for the design parameter id: " << independent_idx << std::endl;
+  std::cout << " AD (x,y,z): " << std::setprecision(8)
+                    << std::setw(18) << std::scientific << pnt_primal.X().getADValue(0)
+                    << std::setw(18) << std::scientific << pnt_primal.Y().getADValue(0)
+                    << std::setw(18) << std::scientific << pnt_primal.Z().getADValue(0) <<
+  std::endl;
+
+  std::cout << " FD (x,y,z): " << std::setprecision(8)
+                      << std::setw(18) << std::scientific << fd_sensitivity_x
+                      << std::setw(18) << std::scientific << fd_sensitivity_y
+                      << std::setw(18) << std::scientific << fd_sensitivity_z << std::endl;
+  */
+
+  EXPECT_NEAR(gradient_x, fd_sensitivity_x, 1e-5);
+  EXPECT_NEAR(gradient_y, fd_sensitivity_y, 1e-5);
+  EXPECT_NEAR(gradient_z, fd_sensitivity_z, 1e-5);
+}
+  #endif
 #endif
 
 INSTANTIATE_TEST_SUITE_P(TestGeomBSplineCurveByParameterRange, // prefix for names
