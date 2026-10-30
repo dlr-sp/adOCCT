@@ -58,11 +58,25 @@
 
 #include <Standard_Macro.hxx>
 
-#include <Standard_Adouble.hxx>
+#ifdef HAVE_ADOLC
+  #include <Standard_Adouble.hxx>
+typedef Standard_Adouble Standard_Real;
+#endif
+
+#ifdef HAVE_CODIPACK
+  #include <Standard_CoDiPack.hxx>
+
+  #ifdef CODIPACK_REVERSE_MODE
+typedef codi::RealReverse Standard_Real;
+  #else
+typedef codi::RealForward Standard_Real;
+  #endif
+
+#endif
 
 typedef int              Standard_Integer;
 typedef unsigned int     Standard_UInteger;
-typedef Standard_Adouble Standard_Real;
+
 typedef bool             Standard_Boolean;
 typedef float            Standard_ShortReal;
 typedef char             Standard_Character;
