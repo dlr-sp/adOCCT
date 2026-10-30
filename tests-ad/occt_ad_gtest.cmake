@@ -26,19 +26,17 @@ add_executable(occt_ad_tests
 )
 
 # Link with Google Test
+if (USE_ADOLC)
 target_link_libraries(occt_ad_tests PRIVATE GTest::gtest_main pthread
         adolc TKernel TKMath TKG2d TKG3d TKGeomBase TKBRep
         TKGeomAlgo TKTopAlgo TKPrim TKBO TKBool TKHLR TKFillet TKOffset TKFeat TKMesh TKXMesh TKShHealing)
-
+elseif (USE_CODIPACK)
+    target_link_libraries(occt_ad_tests PRIVATE GTest::gtest_main pthread
+            CoDiPack TKernel TKMath TKG2d TKG3d TKGeomBase TKBRep
+            TKGeomAlgo TKTopAlgo TKPrim TKBO TKBool TKHLR TKFillet TKOffset TKFeat TKMesh TKXMesh TKShHealing)
+endif ()
 target_compile_definitions(occt_ad_tests PRIVATE GTEST_LINKED_AS_SHARED_LIBRARY=1)
 
 gtest_discover_tests(occt_ad_tests)
 
 # install (TARGETS ${occt_ad_tests} DESTINATION "${INSTALL_DIR_BIN}")
-
-
-
-
-
-
-
