@@ -16,6 +16,10 @@
 
 #include <Geom_BSplineCurve.hxx>
 
+#ifdef HAVE_CODIPACK
+  #include <Standard_CoDiPack.hxx>
+#endif
+
 Handle(Geom_BSplineCurve) bspline_curve(const std::vector<Standard_Real>& design_parameters)
 {
   // control points
@@ -195,7 +199,84 @@ TEST_P(TestGeomBSplineCurveByParameterId, SensitivityWrtPoleCoordinateXYZ)
 
 #ifdef HAVE_CODIPACK
   #ifdef CODIPACK_REVERSE_MODE
-  // TODO
+using Tape = typename codi::RealReverse::Tape;
+
+TEST_P(TestGeomBSplineCurveByParameterId, ReverseSensitivityWrtPoleCoordinateXYZ)
+{
+  // independent variable index (x, y or z)
+  int independent_idx = GetParam();
+
+  ASSERT_TRUE(independent_idx >= 0 && independent_idx <= 2);
+
+  std::vector<Standard_Real> design_parameters = {0.0, 1.0, 2.0};
+
+  codi::Jacobian<double> jacobian(3, 1);
+
+  Tape& tape = codi::RealReverse::getTape();
+  // Start recording
+  tape.setActive();
+
+  // Register inputs
+  tape.registerInput(design_parameters[independent_idx]);
+
+  Handle(Geom_BSplineCurve) ad_curve = bspline_curve(design_parameters);
+
+  gp_Pnt pnt_primal;
+
+  ad_curve->D0(Standard_Real(0.5), pnt_primal);
+
+  Standard_Real xyz_ad[3];
+  xyz_ad[0] = pnt_primal.X();
+  xyz_ad[1] = pnt_primal.Y();
+  xyz_ad[2] = pnt_primal.Z();
+
+  // Register outputs
+  tape.registerOutput(xyz_ad[0]);
+  tape.registerOutput(xyz_ad[1]);
+  tape.registerOutput(xyz_ad[2]);
+
+  // Stop recording
+  tape.setPassive();
+
+  // Iterate over the output dimension
+  for (size_t i = 0; i < 3; ++i)
+  {
+    xyz_ad[i].gradient() = 1.;
+
+    tape.evaluate();
+
+    jacobian(i, 0) = design_parameters[independent_idx].getGradient();
+
+    tape.clearAdjoints();
+  }
+
+  // std::cout << "df/dx = \n" << jacobian << std::endl;
+
+  // finite differences
+  double fd_step = 1e-6;
+
+  double design_parameter_original_value = design_parameters[independent_idx].getValue();
+
+  design_parameters[independent_idx] += fd_step;
+
+  Handle(Geom_BSplineCurve) perturbed_curve = bspline_curve(design_parameters);
+
+  gp_Pnt pnt_perturbed;
+
+  perturbed_curve->D0(Standard_Real(0.5), pnt_perturbed);
+
+  double fd_sensitivity_x = (pnt_perturbed.X().getValue() - pnt_primal.X().getValue()) / fd_step;
+  double fd_sensitivity_y = (pnt_perturbed.Y().getValue() - pnt_primal.Y().getValue()) / fd_step;
+  double fd_sensitivity_z = (pnt_perturbed.Z().getValue() - pnt_primal.Z().getValue()) / fd_step;
+
+  design_parameters[independent_idx] = design_parameter_original_value;
+
+  EXPECT_NEAR(jacobian(0, 0), fd_sensitivity_x, 1e-5);
+  EXPECT_NEAR(jacobian(1, 0), fd_sensitivity_y, 1e-5);
+  EXPECT_NEAR(jacobian(2, 0), fd_sensitivity_z, 1e-5);
+
+  tape.reset(false);
+}
   #else
 TEST_P(TestGeomBSplineCurveByParameterId, SensitivityWrtPoleCoordinateXYZ)
 {
