@@ -773,7 +773,6 @@ else()
 endif ()
 
 if (BUILD_AD_TESTS)
-  enable_testing()
   OCCT_INCLUDE_CMAKE_FILE("tests-ad/occt_ad_gtest")
 endif()
 
