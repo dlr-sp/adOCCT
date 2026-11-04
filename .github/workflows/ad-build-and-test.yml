@@ -3,12 +3,16 @@
 name: Build and Test adOCCT
 
 on:
-  push:
-    branches:
-      - 'ad/**'
   pull_request:
     branches:
-      - 'ad/**'
+      - '**'
+  push:
+    branches:
+      - 'ad/master'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   build-linux-gcc:
