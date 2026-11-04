@@ -1,0 +1,66 @@
+# This workflow builds and tests adOCCT on Ubuntu with GCC
+
+name: Build and Test adOCCT
+
+on:
+  push:
+    branches:
+      - 'ad/**'
+  pull_request:
+    branches:
+      - 'ad/**'
+
+jobs:
+  build-linux-gcc:
+    name: Prepare and Build on Ubuntu with GCC (x64)
+    runs-on: ubuntu-24.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        AD_MODE: [ "adolc-forward", "adolc-reverse" ] # to be extended for "codipack-forward" and "codipack-reverse"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y tcl-dev tk-dev cmake make libx11-dev libglu1-mesa-dev tcllib tcl-thread tcl libfreeimage-dev libfreetype-dev
+
+      - name: Clone and install ADOL-C
+        run: |
+          mkdir -p _deps
+          git clone --branch releases/2.7.2 --depth 1 https://github.com/coin-or/ADOL-C.git _deps/adolc-src
+          cd _deps/adolc-src
+          autoreconf -fi
+          ./configure --enable-atrig-erf --prefix=$GITHUB_WORKSPACE/_deps/adolc-install
+          make -j$(nproc)
+          make install
+
+      #- name: Clone and install CoDiPack
+      #  run: |
+      #    mkdir -p _deps
+      #    git clone --branch v3.1.3 --depth 1 https://github.com/SciCompKL/CoDiPack.git _deps/codipack-src
+      #    cd _deps/codipack-src
+      #    cmake -B build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/_deps/codipack-install
+      #    cmake --install build
+
+      - name: Configure CMake
+        run: |
+          if [ "${{ matrix.AD_MODE }}" == "adolc-forward" ]; then
+            cmake -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DUSE_ADOLC=ON \
+              -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
+              "-DCMAKE_CXX_FLAGS=-Wno-ignored-qualifiers -Wno-deprecated-copy"
+          elif [ "${{ matrix.AD_MODE }}" == "adolc-reverse" ]; then
+            cmake -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DUSE_ADOLC=ON \
+              -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
+              -DADOLC_REVERSE_MODE=ON
+          fi
+
+      - name: Build
+        run: |
+          cmake -B build -j$(nproc)
