@@ -52,6 +52,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DBUILD_CPP_STANDARD=C++17 \
               -DUSE_ADOLC=ON \
+              -DBUILD_AD_TESTS=ON \
               -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
               "-DCMAKE_CXX_FLAGS=-Wno-ignored-qualifiers -Wno-deprecated-copy"
           elif [ "${{ matrix.AD_MODE }}" == "adolc-reverse" ]; then
@@ -59,6 +60,7 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DBUILD_CPP_STANDARD=C++17 \
               -DUSE_ADOLC=ON \
+              -DBUILD_AD_TESTS=ON \
               -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
               -DADOLC_REVERSE_MODE=ON
           fi
@@ -66,3 +68,15 @@ jobs:
       - name: Build
         run: |
           cmake --build build -j$(nproc)
+
+      - name: Run tests
+        working-directory: build
+        run: |
+          ctest --output-on-failure --output-junit test-results.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.AD_MODE }}
+          path: build/test-results.xml
+          retention-days: 7
