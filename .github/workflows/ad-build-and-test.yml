@@ -50,12 +50,14 @@ jobs:
           if [ "${{ matrix.AD_MODE }}" == "adolc-forward" ]; then
             cmake -B build \
               -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_CPP_STANDARD=C++17 \
               -DUSE_ADOLC=ON \
               -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
               "-DCMAKE_CXX_FLAGS=-Wno-ignored-qualifiers -Wno-deprecated-copy"
           elif [ "${{ matrix.AD_MODE }}" == "adolc-reverse" ]; then
             cmake -B build \
               -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_CPP_STANDARD=C++17 \
               -DUSE_ADOLC=ON \
               -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
               -DADOLC_REVERSE_MODE=ON
