@@ -53,8 +53,7 @@ jobs:
               -DBUILD_CPP_STANDARD=C++17 \
               -DUSE_ADOLC=ON \
               -DBUILD_AD_TESTS=ON \
-              -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
-              "-DCMAKE_CXX_FLAGS=-Wno-ignored-qualifiers -Wno-deprecated-copy"
+              -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install
           elif [ "${{ matrix.AD_MODE }}" == "adolc-reverse" ]; then
             cmake -B build \
               -DCMAKE_BUILD_TYPE=Release \
