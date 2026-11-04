@@ -63,4 +63,4 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B build -- -j$(nproc)
+          cmake --build build -j$(nproc)
