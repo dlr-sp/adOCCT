@@ -63,6 +63,9 @@ The steps to configure and build adOCCT are described as follows:
    using the variable `3RDPARTY_BOOST_DIR`. This option makes the *traceless* feature of ADOL-C more performant
    as Boost is used to handle the memory management of *adouble* objects.
 5. Optionally, one can build AD-tests by setting `BUILD_AD_TESTS=ON`.
+   The tests are written using `GoogleTest`. This dependency is automatically downloaded and installed using the
+   CMake's `FetchContent` module. A compatible C++ compiler that supports at least C++17 is required.
+   Furthermore, one should set the variable `BUILD_CPP_STANDARD=C++17`.
 6. Once the configuring is done, proceed with `make && make install`.
 
 Note: `-Wextra` has been removed from `CMAKE_CXX_FLAGS` in the file [
