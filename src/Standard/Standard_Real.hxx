@@ -95,10 +95,10 @@ constexpr double RealSmall()
 //-------------------------------------------------------------------
 inline Standard_Real Abs(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return fabs(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::fabs(Value);
+#else
+  return fabs(Value);
 #endif
 }
 
@@ -220,10 +220,10 @@ inline double IntToReal(const Standard_Integer Value)
 //-------------------------------------------------------------------
 inline Standard_Real ATan(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return atan(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::atan(Value);
+#else
+  return atan(Value);
 #endif
 }
 
@@ -237,10 +237,10 @@ inline double ATan(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Ceiling(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return ceil(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::ceil(Value);
+#else
+  return ceil(Value);
 #endif
 }
 
@@ -254,10 +254,10 @@ inline double Ceiling(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Cos(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return cos(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::cos(Value);
+#else
+  return cos(Value);
 #endif
 }
 
@@ -292,10 +292,10 @@ inline double Epsilon(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Exp(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return exp(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::exp(Value);
+#else
+  return exp(Value);
 #endif
 }
 
@@ -309,10 +309,10 @@ inline double Exp(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Floor(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return floor(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::floor(Value);
+#else
+  return floor(Value);
 #endif
 }
 
@@ -326,10 +326,10 @@ inline double Floor(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real IntegerPart(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return ((Value > 0) ? floor(Value) : ceil(Value));
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return ((Value > 0) ? adtl::floor(Value) : adtl::ceil(Value));
+#else
+  return ((Value > 0) ? Standard_Real(floor(Value)) : Standard_Real(ceil(Value)));
 #endif
 }
 
@@ -343,10 +343,10 @@ inline double IntegerPart(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Log10(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return log10(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::log10(Value);
+#else
+  return log10(Value);
 #endif
 }
 
@@ -391,28 +391,28 @@ inline double Pow(const double Value, const double P)
 
 inline Standard_Real Pow(const Standard_Real& Value, const double P)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return pow(Value, P);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::pow(Value, P);
+#else
+  return pow(Value, P);
 #endif
 }
 
 inline Standard_Real Pow(const double Value, const Standard_Real P)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return pow(Value, P);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::pow(Value, P);
+#else
+  return pow(Value, P);
 #endif
 }
 
 inline Standard_Real Pow(const Standard_Real& Value, const Standard_Real P)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return pow(Value, P);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::pow(Value, P);
+#else
+  return pow(Value, P);
 #endif
 }
 
@@ -421,10 +421,10 @@ inline Standard_Real Pow(const Standard_Real& Value, const Standard_Real P)
 //-------------------------------------------------------------------
 inline Standard_Real RealPart(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return fabs(IntegerPart(Value) - Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::fabs(IntegerPart(Value) - Value);
+#else
+  return fabs(IntegerPart(Value) - Value);
 #endif
 }
 
@@ -516,10 +516,10 @@ inline Standard_Real ASinh(const Standard_Real& Value)
 }
 #else
 {
-  #ifdef ADOLC_REVERSE_MODE
-  return asinh(Value);
-  #else
+  #if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::asinh(Value);
+  #else
+  return asinh(Value);
   #endif
 }
 #endif
@@ -552,10 +552,10 @@ constexpr double Square(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Tan(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return tan(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::tan(Value);
+#else
+  return tan(Value);
 #endif
 }
 
@@ -569,10 +569,10 @@ inline double Tan(const double Value)
 //-------------------------------------------------------------------
 inline Standard_Real Tanh(const Standard_Real& Value)
 {
-#ifdef ADOLC_REVERSE_MODE
-  return tanh(Value);
-#else
+#if defined(HAVE_ADOLC) and !defined(ADOLC_REVERSE_MODE)
   return adtl::tanh(Value);
+#else
+  return tanh(Value);
 #endif
 }
 
