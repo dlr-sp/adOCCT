@@ -31,6 +31,12 @@ else()
   set (CSF_ADOLC)
 endif()
 
+if (USE_CODIPACK)
+  set(CSF_CoDiPack "CoDiPack")
+else ()
+  set(CSF_CoDiPack)
+endif ()
+
 # FFmpeg
 if (USE_FFMPEG)
   set (CSF_FFmpeg "avcodec avformat swscale avutil")
