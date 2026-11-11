@@ -2,11 +2,13 @@
 
 Algorithmic Differentiation (AD) is applied
 to [Open CASCADE Technology (OCCT)](https://github.com/Open-Cascade-SAS/OCCT)
-in order to enable the computation of the so-called geometric sensitivities (e.g., derivatives of
+to compute geometric sensitivities (e.g., derivatives of
 surface nodes with respect to its design parameters such as control points).
-The differentiated OCCT variant, named *adOCCT*, is developed by integrating the AD tool
+The resulting differentiated variant, named *adOCCT*, was initially achieved by integrating the AD software tool
 [ADOL-C](https://github.com/coin-or/adol-c) (*Automatic Differentiation by Overloading in C++*)
-into its source-code.
+into OCCT's source code.
+Subsequently, adOCCT was extended to support AD using
+[CoDiPack](https://github.com/SciCompKL/CoDiPack) (*Code Differentiation Package*).
 
 ## License
 
@@ -28,7 +30,12 @@ official [Building OCCT](https://dev.opencascade.org/doc/occt-7.9.0/overview/htm
 page for instructions.
 Additional steps and requirements are described in the following.
 
-### ADOL-C
+### Choosing between supported AD software tools
+
+One can choose between ADOL-C and CoDiPack to compute geometric sensitivities in adOCCT.
+In any case, both forward and reverse mode of AD can be used.
+
+#### ADOL-C
 
 For the purpose of OCCT differentiation, the ADOL-C library *v2.7.2* is used under the terms of Eclipse Public License
 1.0.
@@ -39,37 +46,71 @@ When configuring ADOL-C, one has to activate the flag `--enable-atrig-erf`.
 For example, its installation process can be executed as follows:
 
 ```
-./configure --prefix=ADOLC_PREFIX --enable-atrig-erf
+./configure --prefix=<ADOLC_PREFIX> --enable-atrig-erf
 make && make install
 ```
 
-where `ADOLC_PREFIX` is the desired destination where header- and library-files are going to be installed.
+where `<ADOLC_PREFIX>` is the desired destination where header- and library-files are going to be installed.
+
+#### CoDiPack
+
+To download CoDiPack, please refer to its [official page](https://github.com/SciCompKL/CoDiPack).
+Its release *v3.1.3* (or later) is considered here.
+
+Inside its source directory one can execute the following to install CoDiPack:
+
+```
+cmake -B build -DCMAKE_INSTALL_PREFIX=<CODIPACK_PREFIX>
+cmake --install build
+```
+
+where `<CODIPACK_PREFIX>` is the desired destination where header- and configuration-files are going to be installed.
 
 ### adOCCT
 
-The steps to configure and build adOCCT are described as follows:
+The AD-branch is named `ad/master` and it is the default branch for this repository.
 
-1. Checkout `ad/master` branch (should be done by default).
-2. Configure adOCCT using CMake by setting the following variable: `USE_ADOLC=ON`.
-   After that, a PkgConfig module for CMake is loaded to search for the existing ADOL-C installation.
-   If it fails to find it, which can be the case with a local ADOL-C installation that is not added
-   to common search paths, one has to manually set a variable `3RDPARTY_ADOLC_DIR` to the path where
-   ADOL-C installation resides (i.e., `ADOLC_PREFIX` described previously).
-   From that, variables for the ADOL-C include and library directories are automatically derived.
-3. To activate the reverse mode of AD, set the variable `ADOLC_REVERSE_MODE=ON`. This will build adOCCT using the
-   *trace-based* headers of ADOL-C, otherwise the *traceless* header of ADOL-C is employed which allows only
-   the forward mode of AD.
-4. Optionally, if ADOL-C has been built with Boost, one can provide the used Boost installation directory
-   using the variable `3RDPARTY_BOOST_DIR`. This option makes the *traceless* feature of ADOL-C more performant
-   as Boost is used to handle the memory management of *adouble* objects.
-5. Optionally, one can build AD-tests by setting `BUILD_AD_TESTS=ON`.
-   The tests are written using `GoogleTest`. This dependency is automatically downloaded and installed using the
-   CMake's `FetchContent` module. A compatible C++ compiler that supports at least C++17 is required.
-   Furthermore, one should set the variable `BUILD_CPP_STANDARD=C++17`.
-6. Once the configuring is done, proceed with `make && make install`.
+Examples of CMake commands can be found in a GitHub workflow of this project:
+[`ad-build-and-test.yml`](.github/workflows/ad-build-and-test.yml).
+The relevant configuration variables are explained as follows.
 
-Note: `-Wextra` has been removed from `CMAKE_CXX_FLAGS` in the file [
-`adm/cmake/occt_defs_flags.cmake`](adm/cmake/occt_defs_flags.cmake)
+While configuring adOCCT using CMake, set either `USE_ADOLC=ON` or `USE_CODIPACK=ON` flag, depending on your
+preferred AD tool.
+
+**ADOL-C-related CMake variables**:
+
+* `3RDPARTY_ADOLC_DIR`: Path to the ADOL-C installation directory (i.e., `<ADOLC_PREFIX>`).
+* `ADOLC_REVERSE_MODE`: Boolean flag. If `ON`, adOCCT is built using ADOL-C’s *trace-based* headers enabling
+  reverse-mode AD;
+  otherwise, the *traceless adouble* header is used for forward-mode AD.
+* `3RDPARTY_BOOST_DIR`: Optional path. If ADOL-C was built with Boost support, specify the Boost installation directory.
+  This enables more efficient memory management of `adouble` objects in the *traceless* forward-mode AD.
+
+**CoDiPack-related CMake variables**:
+
+* `CoDiPack_DIR`: Path to the CoDiPack installation directory (i.e., `<CODIPACK_PREFIX>`).
+* `CODIPACK_REVERSE_MODE`: Boolean flag. If `ON`, `codi::RealReverse` is used; otherwise, `codi::RealForward` is used
+  as the AD type.
+
+**Common CMake variables**:
+
+* `BUILD_AD_TESTS`: Boolean flag. If `ON`, the AD tests in the [`tests-ad`](tests-ad) directory are built.
+  These tests use `GoogleTest`, which is automatically downloaded and installed via CMake’s `FetchContent` module.
+* `BUILD_CPP_STANDARD`: Specifies the desired C++ standard. It is recommended to use `C++17`, as required by
+  CoDiPack and GoogleTest. When using ADOL-C, older standards like `C++11` or `C++14` are supported, but note that
+  using them may require setting `BUILD_AD_TESTS=OFF` due to compatibility constraints.
+* `INSTALL_DIR`: Path where adOCCT is going to be installed.
+
+Once the configuration step is completed, one can execute the following commands to build and install adOCCT (replace
+`<BUILD_DIR>` and `<NUMBER_OF_THREADS>` accordingly):
+
+```
+cmake --build <BUILD_DIR> -j<NUMBER_OF_THREADS>
+cmake --install <BUILD_DIR>
+```
+
+Note: `-Wextra` has been removed from `CMAKE_CXX_FLAGS` in the file
+[`adm/cmake/occt_defs_flags.cmake`](adm/cmake/occt_defs_flags.cmake)
 to discard warnings regarding ADOL-C.
 
 ## Version
@@ -79,9 +120,8 @@ The current version of adOCCT can be found in the file [`adm/cmake/version.cmake
 ## Cite as
 
 - Banović, M., Mykhaskiv, O., Auriemma, S., Walther, A., Legrand, H., and Müller, J. D. (2018). Algorithmic
-  differentiation
-of the Open CASCADE Technology CAD kernel and its coupling with an adjoint CFD solver. Optimization Methods and
-Software, 33(4–6), 813–828. https://doi.org/10.1080/10556788.2018.1431235
+  differentiation of the Open CASCADE Technology CAD kernel and its coupling with an adjoint CFD solver.
+  Optimization Methods and Software, 33 (4–6), 813–828. https://doi.org/10.1080/10556788.2018.1431235
 - Hafemann, T., Banović, M. , Büchner, A. , Ehrmanntraut, S., Höing, C., Gottfried, S., and Stück, A. (2024).
   A CAD-enabled MDAO Framework Approach for Gradient-based Aerodynamic Shape Optimization.
   In: 9th European Congress on Computational Methods in Applied Sciences and Engineering (ECCOMAS 2024).
