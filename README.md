@@ -54,6 +54,12 @@ where `<ADOLC_PREFIX>` is the desired destination where header- and library-file
 
 #### CoDiPack
 
+As [stated](https://github.com/SciCompKL/CoDiPack/blob/c25d5c19d8207a1a732cfff0f79ac04cbeef01d8/EXEMPTIONS.md) in the official CoDiPack project repository on
+GitHub (https://github.com/SciCompKL/CoDiPack), the copyright holders of CoDiPack have granted
+a project-specific additional permission allowing the use of CoDiPack in adOCCT under the terms of
+the GNU Lesser General Public License, version 2.1 (LGPL-2.1). For the applicable licensing terms and
+the additional permission, please refer to the official CoDiPack repository.
+
 To download CoDiPack, please refer to its [official page](https://github.com/SciCompKL/CoDiPack).
 Its release *v3.1.3* (or later) is considered here.
 
@@ -136,11 +142,3 @@ on the project and its follow-ups. This may lead to issue and tickets, which are
 In case you need an urgent fix, please contact us directly for discussing possible forms of
 collaboration (direct contribution, projects, contracting, ...):
 [Institute of Software Methods for Product Virtualization](https://www.dlr.de/sp)
-
-## CoDiPack
-
-As [stated](https://github.com/SciCompKL/CoDiPack/blob/c25d5c19d8207a1a732cfff0f79ac04cbeef01d8/EXEMPTIONS.md) in the official CoDiPack project repository on
-GitHub (https://github.com/SciCompKL/CoDiPack), the copyright holders of CoDiPack have granted
-a project-specific additional permission allowing the use of CoDiPack in adOCCT under the terms of
-the GNU Lesser General Public License, version 2.1 (LGPL-2.1). For the applicable licensing terms and
-the additional permission, please refer to the official CoDiPack repository.
