@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        AD_MODE: [ "adolc-forward", "adolc-reverse" ] # to be extended for "codipack-forward" and "codipack-reverse"
+        AD_MODE: [ "adolc-forward", "adolc-reverse", "codipack-forward", "codipack-reverse" ]
 
     steps:
       - name: Checkout repository
@@ -41,13 +41,13 @@ jobs:
           make -j$(nproc)
           make install
 
-      #- name: Clone and install CoDiPack
-      #  run: |
-      #    mkdir -p _deps
-      #    git clone --branch v3.1.3 --depth 1 https://github.com/SciCompKL/CoDiPack.git _deps/codipack-src
-      #    cd _deps/codipack-src
-      #    cmake -B build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/_deps/codipack-install
-      #    cmake --install build
+      - name: Clone and install CoDiPack
+        run: |
+          mkdir -p _deps
+          git clone --branch v3.1.3 --depth 1 https://github.com/SciCompKL/CoDiPack.git _deps/codipack-src
+          cd _deps/codipack-src
+          cmake -B build -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/_deps/codipack-install
+          cmake --install build
 
       - name: Configure CMake
         run: |
@@ -66,6 +66,21 @@ jobs:
               -DBUILD_AD_TESTS=ON \
               -D3RDPARTY_ADOLC_DIR=$GITHUB_WORKSPACE/_deps/adolc-install \
               -DADOLC_REVERSE_MODE=ON
+          elif [ "${{ matrix.AD_MODE }}" == "codipack-forward" ]; then
+            cmake -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_CPP_STANDARD=C++17 \
+              -DUSE_CODIPACK=ON \
+              -DBUILD_AD_TESTS=ON \
+              -DCoDiPack_DIR=$GITHUB_WORKSPACE/_deps/codipack-install/share/CoDiPack/cmake
+          elif [ "${{ matrix.AD_MODE }}" == "codipack-reverse" ]; then
+            cmake -B build \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_CPP_STANDARD=C++17 \
+              -DUSE_CODIPACK=ON \
+              -DBUILD_AD_TESTS=ON \
+              -DCoDiPack_DIR=$GITHUB_WORKSPACE/_deps/codipack-install/share/CoDiPack/cmake \
+              -DCODIPACK_REVERSE_MODE=ON
           fi
 
       - name: Build
